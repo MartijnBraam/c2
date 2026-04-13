@@ -59,6 +59,7 @@ class UI:
         self.af_pos = StateNumber((0.5, 0.5))
         self.focus = StateNumber(0.0)
         self.tally = StateNumber(0)
+        self.ip = StateNumber("N/A")
 
         # Preview state
         self.zebra = StateNumber(False)
@@ -113,6 +114,7 @@ class UI:
         if self.hdmi:
             return
         HandleInputs(self.input_queue, self.config)
+        self.ip.set(self.get_ip())
 
     def _create_hdmi_layout(self):
         l: Layout = self.screens["main"]
@@ -263,9 +265,13 @@ class UI:
 
     def get_ip(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
+        try:
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+        except:
+            print("Could not get default IP")
+            return "0.0.0.0"
         return str(ip)
 
     def get_sensor(self):
@@ -339,7 +345,7 @@ class UI:
 
         page2 = VBox(name="info")
         page2.add(TextRow("Sensor", StateNumber(self.get_sensor()), None, text_width=130))
-        page2.add(TextRow("IP Address", StateNumber(self.get_ip()), None, text_width=130))
+        page2.add(TextRow("IP Address", self.ip, None, text_width=130))
         l.add_widget(Layout.MIDDLE, page2)
         page2.compute()
 
@@ -425,6 +431,7 @@ class UI:
         else:
             self.cam.enable_histogram(False)
             self.cam.move_vu(True)
+            self.ip.set(self.get_ip())
 
     def open_settings(self, state):
         if state:
