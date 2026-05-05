@@ -3,8 +3,8 @@ Description=Camera
 After=mediamtx.service
 
 [Service]
-WorkingDirectory=/opt/picam
-ExecStart=/usr/bin/python3 -m mncam
+WorkingDirectory=/opt/c2
+ExecStart=/usr/bin/python3 -m c2
 
 [Install]
 WantedBy=multi-user.target

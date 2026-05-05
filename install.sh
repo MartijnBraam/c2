@@ -71,7 +71,7 @@ msg "Putting config files in place..."
 install -m644 system/camera.service /etc/systemd/system/camera.service
 sed -i '/^WorkingDirectory=/c\WorkingDirectory='$PWD /etc/systemd/system/camera.service
 install -m644 system/camera-api.service /etc/systemd/system/camera-api.service
-sed -i '/^ExecStart=/c\ExecStart='$PWD/mncam_api /etc/systemd/system/camera-api.service
+sed -i '/^ExecStart=/c\ExecStart='$PWD/c2_api /etc/systemd/system/camera-api.service
 install -m644 system/haproxy.cfg /etc/haproxy/haproxy.cfg
 mkdir -p /etc/mediamtx
 install -m644 system/mediamtx.yml /etc/mediamtx/mediamtx.yml

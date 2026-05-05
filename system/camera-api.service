@@ -4,7 +4,7 @@ Requires=camera.service haproxy.service mediamtx.service
 After=camera.service
 
 [Service]
-ExecStart=/opt/picam/mncam_api
+ExecStart=/opt/c2/c2_api
 
 [Install]
 WantedBy=multi-user.target
