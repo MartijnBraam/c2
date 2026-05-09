@@ -61,6 +61,12 @@ class UI:
         self.tally = StateNumber(0)
         self.ip = StateNumber("N/A")
 
+        # Primary color corrector state
+        self.cc_lift = StateNumber(0)
+        self.cc_gamma = StateNumber(0)
+        self.cc_gain = StateNumber(1)
+        self.cc_offset = StateNumber(0)
+
         # Preview state
         self.zebra = StateNumber(False)
         self.histogram = StateNumber(False)

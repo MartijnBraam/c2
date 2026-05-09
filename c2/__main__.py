@@ -19,6 +19,7 @@ from c2.audio import AudioManager
 from c2.config import Config
 from c2.drmoutput import DRMOutput
 from c2.edid import check_edid
+from c2.gamma import open_isp, generate_curve, set_isp_gamma
 
 from c2.user_interface import UI
 
@@ -33,6 +34,7 @@ class Camera:
 
     def __init__(self):
         self.cam = Picamera2()
+        self.isp = open_isp()
         self.state = {}
         self.edid = None
         self.preview_w = 1
@@ -77,7 +79,8 @@ class Camera:
                                                self.config.aux.framerate, 1)
         # Configure the hardware H.264 encoder
         if self.config.encoder.enabled:
-            self.encoder = H264Encoder(self.config.encoder.bitrate_int)
+            self.encoder = H264Encoder(self.config.encoder.bitrate_int, framerate=self.config.sensor.framerate,
+                                       profile='high')
             self.stream = PyavOutput("rtsp://127.0.0.1:8554/cam", format="rtsp")
             self.encoder.output = self.stream
 
@@ -291,6 +294,28 @@ class Camera:
     def enable_auto_whitebalance(self, enabled):
         self.ui.awb.set(enabled)
         self.cam.set_controls({"AwbEnable": enabled})
+
+    def update_gamma_curve(self):
+        curve = generate_curve(self.ui.cc_lift.value, self.ui.cc_gamma.value, self.ui.cc_gain.value,
+                               self.ui.cc_offset.value)
+        set_isp_gamma(self.isp, curve)
+
+    def set_gamma(self, gamma):
+        """ Set gamma in the scale of the bmd primary color corrector (0 = linear) """
+        self.ui.cc_gamma.set(gamma)
+        self.update_gamma_curve()
+
+    def set_lift(self, lift):
+        self.ui.cc_lift.set(lift)
+        self.update_gamma_curve()
+
+    def set_cc_gain(self, gain):
+        self.ui.cc_gain.set(gain)
+        self.update_gamma_curve()
+
+    def set_cc_offset(self, offset):
+        self.ui.cc_offset.set(offset)
+        self.update_gamma_curve()
 
     def set_ev(self, compensation):
         self.ui.ec.set(compensation)
