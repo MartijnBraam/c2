@@ -13,8 +13,7 @@ bevel=8;
 case_screw_offset=5.2;
 
 
-include<components.scad>;
-
+include<../lib/components.scad>;
 
 module cam4_mountbody() {
         size=62;

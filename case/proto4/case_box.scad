@@ -16,7 +16,7 @@ screw_offset=3.4;
 
 render_bottom=false;
 
-include<components.scad>;
+include<../lib/components.scad>;
 
 module beam(length=100) {
     linear_extrude(length) {
