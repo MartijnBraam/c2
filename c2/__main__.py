@@ -1,6 +1,7 @@
 import math
 import os.path
 import queue
+import subprocess
 import threading
 import time
 import cv2
@@ -48,6 +49,18 @@ class Camera:
 
         self.config = Config("/boot/camera.ini")
 
+        if self.config.encoder.enabled and self.config.omt_bridge.enabled:
+            raise RuntimeError(
+                "encoder.enabled and omt_bridge.enabled cannot both be true - "
+                "the H.264 encoder (-> mediamtx -> local recording) and the "
+                "OMT bridge are never run at the same time on this hardware."
+            )
+
+        # mediamtx only has a job when the H.264 encoder is feeding it - keep
+        # the service state in sync with the config instead of leaving it
+        # running, or stopped, for no reason.
+        subprocess.run(["systemctl", "start" if self.config.encoder.enabled else "stop", "mediamtx.service"])
+
         self.output_hdmi = self.config.output.output
         self.output_ui = self.config.monitor.output
         self.output_aux = self.config.aux.output
@@ -60,7 +73,10 @@ class Camera:
             "format": "UYVY"
         },
             lores={
-                "size": main_size,
+                # Only needs to match main_size when the H.264 encoder reads
+                # from it - otherwise it's just local display + overlay
+                # analysis, so keep it at the smaller monitor resolution.
+                "size": main_size if self.config.encoder.enabled else self.ui_size,
                 "format": "YUV420"
             },
             display="lores",
