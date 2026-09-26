@@ -1,9 +1,11 @@
 # omt-camera-bridge
 
-Reads raw YUV420 (I420) camera frames from the `c2` Python app over stdin,
-converts them to UYVY, and streams them out over
+Reads raw UYVY camera frames from the `c2` Python app over stdin and
+streams them out over
 [Open Media Transport](https://www.openmediatransport.org/) (OMT) so the
-camera shows up as a source in OBS, vMix, etc.
+camera shows up as a source in OBS, vMix, etc. picamera2's "main" stream is
+configured as UYVY natively (the vc4 ISP emits it directly), so there's no
+pixel-format conversion here.
 
 `c2` spawns this as a subprocess and writes frames straight to its stdin.
 See `../c2/omtbridge.py` for the Python side that spawns and feeds it.

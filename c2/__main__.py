@@ -57,12 +57,14 @@ class Camera:
         main_size = (1920, 1080)
         preview_config = self.cam.create_preview_configuration(main={
             "size": main_size,
-            "format": "YUV420"
+            "format": "UYVY"
         },
             lores={
-                "size": self.ui_size,
+                "size": main_size,
                 "format": "YUV420"
             },
+            display="lores",
+            encode="lores",
             controls={
                 'FrameRate': self.config.sensor.framerate,
                 "NoiseReductionMode": self.config.sensor.noise_reduction_constant,
@@ -315,7 +317,7 @@ class Camera:
         self.cam.start_preview(self.drm)
         self.cam.start()
         if self.config.encoder.enabled:
-            self.cam.start_encoder(self.encoder)
+            self.cam.start_encoder(self.encoder, name="lores")
 
         for i in range(100):
             time.sleep(0.1)

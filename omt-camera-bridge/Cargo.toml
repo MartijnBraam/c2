@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.97"
 license = "MIT"
-description = "Reads raw YUV420 camera frames from the c2 Python app over stdin, converts to UYVY, and streams them out over Open Media Transport (OMT)."
+description = "Reads raw UYVY camera frames from the c2 Python app over stdin and streams them out over Open Media Transport (OMT)."
 
 [[bin]]
 name = "omt-camera-bridge"
@@ -15,9 +15,6 @@ path = "src/main.rs"
 # https://github.com/MikanseiLaboratory/openmediatransport-rs
 [dependencies]
 openmediatransport = { git = "https://github.com/MikanseiLaboratory/openmediatransport-rs", rev = "2e57ca89e0af4ca9f4e9642c72f26c0d0b1eef64" }
-# Pure-Rust, SIMD-accelerated (incl. NEON) YUV pixel format conversion -
-# https://docs.rs/yuv. Used for I420 -> UYVY422 instead of a hand-rolled loop.
-yuv = "0.8"
 # Structured logging - tracing-journald writes events straight to journald's
 # native protocol (with the binary-safe framing and memfd fallback we'd
 # otherwise have to hand-roll ourselves).
