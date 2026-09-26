@@ -100,7 +100,8 @@ class Camera:
 
         def preview(request):
             self.update_preview(request)
-            if self.config.omt_bridge.enabled and self.omt_bridge.is_running():
+            if (self.config.omt_bridge.enabled and self.omt_bridge.is_running()
+                    and self.omt_bridge.wants_frame()):
                 with MappedArray(request, "main") as mapped:
                     self.omt_bridge.push_frame(mapped.array.tobytes())
 

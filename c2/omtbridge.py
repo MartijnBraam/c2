@@ -39,6 +39,13 @@ class OmtBridge:
         with self._proc_lock:
             return self._proc is not None and self._proc.poll() is None
 
+    def wants_frame(self):
+        """False while the previous frame is still queued/being sent - lets
+        the caller skip capturing a new one instead of computing work that
+        would just be dropped."""
+        with self._cond:
+            return self._latest is None
+
     def push_frame(self, data):
         with self._cond:
             self._latest = data
