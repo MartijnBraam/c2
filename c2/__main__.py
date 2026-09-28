@@ -334,8 +334,8 @@ class Camera:
             self.controls.temperature.max.set(awb["ct_curve"][-3])
         else:
             print("No CT curve defined in sensor calibration file")
-            self.controls.temperature.min.set.set(2500)
-            self.controls.temperature.max.set.set(9000)
+            self.controls.temperature.min.set(2500)
+            self.controls.temperature.max.set(9000)
 
         self.update_gamma_curve()
 
