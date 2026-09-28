@@ -34,9 +34,12 @@ class MisirkaAPI:
                 desc += f"Range: {control.min} - {control.max}\n"
             if control.choices is not None:
                 desc += "Choices: " + ", ".join(control.choices)
-            examples = [control.value.value]
+            examples = ['', control.value.value]
             if control.choices is not None:
                 examples = control.choices
+            if len(examples) == 0:
+                # Misirka complains when there's no examples
+                examples = ['']
             self.msk.add_topic(name, desc, examples, True)
             self.msk.publish(name, control.value.value)
 
