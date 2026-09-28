@@ -70,6 +70,9 @@ class Camera:
             }, colour_space=ColorSpace.Rec709())
         self.cam.configure(preview_config)
 
+        self.native_width = 1920
+        self.native_height = 1080
+
         # Enable DRM output of the camera stream to the HDMI output and the DSI display
         self.drm = DRMOutput(self.config.output.mode[0], self.config.output.mode[1], self.controls)
         self.out_hdmi = self.drm.use_output(self.output_hdmi, self.config.output.mode[0], self.config.output.mode[1],
@@ -246,6 +249,23 @@ class Camera:
         self.controls.audio_mux_left.set_handler(lambda v: self.set_audio_mux('L', v))
         self.controls.audio_mux_right.set_handler(lambda v: self.set_audio_mux('R', v))
 
+        self.controls.add(StateControl("squeeze-factor", self.config.sensor.squeeze_factor, 1.0, 2.5), key="squeeze")
+        self.controls.squeeze.set_handler(lambda v: self.set_squeeze(v))
+        self.controls.squeeze.help = "Set squeeze factor of anamorphic lens used to desqueeze the output"
+        self.set_squeeze(self.config.sensor.squeeze_factor)
+
+        self.controls.add(StateControl("zoom", 1.0, 1.0, 8.0))
+        self.controls.zoom.set_handler(lambda v: self.set_panscan(zoom=v))
+        self.controls.zoom.help = "Set zoom factor for the HDMI output"
+
+        self.controls.add(StateControl("pan-x", 0.0, -1.0, 1.0), key="left")
+        self.controls.left.set_handler(lambda v: self.set_panscan(left=v))
+        self.controls.left.help = "Pan the sensor area in the horizontal axis"
+
+        self.controls.add(StateControl("pan-y", 0.0, -1.0, 1.0), key="top")
+        self.controls.top.set_handler(lambda v: self.set_panscan(top=v))
+        self.controls.top.help = "Pan the sensor area in the vertical axis"
+
     def set_audio_gain(self, chan, val):
         self.audio.set_gain(chan, val)
         if chan == 'L':
@@ -262,6 +282,9 @@ class Camera:
             self.controls.audio_mux_right.set(src, front=False)
             self.config.audio.right_source = src
         self.config.save_config()
+
+    def set_crop(self, x, y, w, h):
+        self.cam.set_controls({"ScalerCrop": (x, y, w, h)})
 
     def set_sharpness(self, val):
         self.controls.sharpness.set(val, front=False)
@@ -322,6 +345,10 @@ class Camera:
         self.preview_w, self.preview_h = self.cam.stream_configuration("lores")["size"]
         self.create_mask_images()
         self.ui.start()
+
+        bounds = self.cam.camera_properties["ScalerCropMaximum"]
+        self.native_width = bounds[2]
+        self.native_height = bounds[3]
 
         audio_thread = threading.Thread(target=self.audio.start_loop, args=(self.levels,))
         audio_thread.daemon = True
@@ -597,6 +624,36 @@ class Camera:
         self.cam.set_controls({"FrameRate": fps})
         self.out_dsi.set_fps(fps)
         self.out_hdmi.set_fps(fps)
+
+    def set_squeeze(self, squeeze):
+        self.controls.squeeze.set(squeeze, front=False)
+        self.config.save_config()
+
+        self.out_dsi.squeeze = squeeze
+        self.out_hdmi.squeeze = squeeze
+
+    def set_panscan(self, zoom=None, left=None, top=None):
+        if zoom is not None:
+            self.controls.zoom.set(zoom, front=False)
+        if left is not None:
+            self.controls.left.set(left, front=False)
+        if top is not None:
+            self.controls.top.set(top, front=False)
+
+        zoom = self.controls.zoom.value.value
+        left = self.controls.left.value.value
+        top = self.controls.top.value.value
+
+        nw = int(self.native_width / zoom)
+        nh = int(self.native_height / zoom)
+        nx = int((self.native_width - nw) / 2)
+        ny = int((self.native_height - nh) / 2)
+
+        sx, sy = nx, ny
+        nx += int(sx * left)
+        ny += int(sy * top)
+
+        self.set_crop(nx, ny, nw, nh)
 
     def set_tally(self, mask):
         self.controls.tally.set(mask, front=False)

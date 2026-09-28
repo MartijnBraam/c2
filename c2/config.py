@@ -55,6 +55,8 @@ class SensorConfig:
         self.saturation = 1.0
         self.noise_reduction = "fast"
 
+        self.squeeze_factor = 1.0
+
     @property
     def noise_reduction_constant(self):
         if self.noise_reduction == "fast":

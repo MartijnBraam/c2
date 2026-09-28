@@ -434,6 +434,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     section = document.createElement("section");
     label = document.createElement("label");
+    label.innerText = "Pan/scan";
+    section.appendChild(label);
+    controls.appendChild(section);
+    section.appendChild(new MisirkaSlider(misirka, "squeeze", "Desqueeze", fmt`{2f}x`).dom());
+    section.appendChild(new MisirkaSlider(misirka, "zoom", "Zoom", fmt`{2f}x`).dom());
+    section.appendChild(new MisirkaSlider(misirka, "pan-x", "Horizontal pan", fmt`{2f}x`).dom());
+    section.appendChild(new MisirkaSlider(misirka, "pan-y", "Vertical pan", fmt`{2f}x`).dom());
+
+    section = document.createElement("section");
+    label = document.createElement("label");
     label.innerText = "Audio";
     section.appendChild(label);
     controls.appendChild(section);

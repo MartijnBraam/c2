@@ -29,6 +29,9 @@ class Connector:
         self.overlay_pos = []
 
         self.zoom = 1.0
+        self.squeeze = 1.0
+        self.pan_x = 0.0
+        self.pan_y = 0.0
 
         self.overlay_dirty = {}
 
@@ -88,7 +91,6 @@ class Connector:
         mode.vdisplay = self.height
         mode.vrefresh = fps
         self._crtc.set_mode(self._conn, mode)
-
 
 class DRMOutput(NullPreview):
     def __init__(self, width, height, controls):
@@ -175,8 +177,12 @@ class DRMOutput(NullPreview):
                     src_h = int(height / conn.zoom)
                     src_x = int(width - src_w) // 2
                     src_y = int(height - src_h) // 2
+
+                src_x += conn.pan_x * src_w
+                src_y += conn.pan_y * src_h
                 ctx.add_plane(conn._plane, drmfb, conn._crtc, (src_x, src_y, src_w, src_h),
-                              (0, 0, conn.width, conn.height))
+                              (0, int((conn.height - (conn.height / conn.squeeze)) / 2), conn.width,
+                               int(conn.height / conn.squeeze)))
 
         for cname in self.conn:
             conn = self.conn[cname]

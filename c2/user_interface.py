@@ -185,6 +185,16 @@ class UI:
             60: "60",
         }, handler=lambda v: self.controls.fps.set(v),
                                background=(0, 0, 0, 80)))
+
+        fps_panel.add(RadioRow("Desqueeze", self.controls.squeeze.value, options=[1.0, 1.33, 1.5, 2.0],
+                               handler=lambda v: self.controls.squeeze.set(v),
+                               text_width=130))
+        fps_panel.add(
+            ControlSlider("Zoom", self.controls.zoom, text_width=130))
+        fps_panel.add(
+            ControlSlider("Pan H", self.controls.left, text_width=130))
+        fps_panel.add(
+            ControlSlider("Pan V", self.controls.top, text_width=130))
         fps_panel.compute()
         l.add_widget(Layout.MIDDLE, fps_panel)
 
@@ -283,6 +293,7 @@ class UI:
         page1.add(
             Slider("Backlight", self.backlight, handler=lambda v: self.set_backlight(v),
                    min=self.min_backlight, max=self.max_backlight))
+
         l.add_widget(Layout.MIDDLE, page1)
         page1.compute()
 
@@ -291,7 +302,6 @@ class UI:
             ControlSlider("Left gain", self.controls.audio_gain_left, text_width=130))
         page3.add(
             ControlSlider("Right gain", self.controls.audio_gain_right, text_width=130))
-
 
         left_opts = {}
         for item in self.cam.audio.get_routes('L'):

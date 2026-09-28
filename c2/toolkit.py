@@ -365,7 +365,10 @@ class RadioRow(Widget):
         offset = self.x + self.text_width + 10
         self._regions = []
         for key in self.options:
-            label = self.options[key]
+            if isinstance(key, float):
+                label = str(key)
+            else:
+                label = self.options[key]
             _, _, w, _ = ctx.textbbox((0, 0), str(label), font=self.FONT)
             width = w + hpad + hpad
             if key == self.state.value:
