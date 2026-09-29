@@ -66,10 +66,26 @@ impl Args {
     }
 }
 
+/// openmediatransport-rs uses $HOSTNAME to build its DNS-SD
+fn ensure_hostname_env() {
+    if std::env::var_os("HOSTNAME").is_some() {
+        return;
+    }
+    if let Ok(hostname) = std::fs::read_to_string("/etc/hostname") {
+        let hostname = hostname.trim();
+        if !hostname.is_empty() {
+            // SAFETY: called once, at start-up, before any threads exist.
+            unsafe { std::env::set_var("HOSTNAME", hostname) };
+        }
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // No "F_" prefix on our own fields - we already namespace them with `omt_`.
     let journald_layer = tracing_journald::Layer::new()?.with_field_prefix(None);
     tracing::subscriber::set_global_default(tracing_subscriber::registry().with(journald_layer))?;
+
+    ensure_hostname_env();
 
     let args = Args::parse();
     if args.width % 2 != 0 {
