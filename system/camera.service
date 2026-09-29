@@ -3,7 +3,7 @@ Description=Camera
 After=mediamtx.service
 
 [Service]
-WorkingDirectory=/opt/c2
+WorkingDirectory=/opt/mncam
 ExecStart=/usr/bin/python3 -m c2
 
 [Install]
