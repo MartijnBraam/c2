@@ -1,0 +1,28 @@
+[package]
+name = "omt-camera-bridge"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+license = "MIT"
+description = "Reads raw UYVY camera frames from the c2 Python app over stdin and streams them out over Open Media Transport (OMT)."
+
+[[bin]]
+name = "omt-camera-bridge"
+path = "src/main.rs"
+
+# Pinned to a specific commit of an independent, community-maintained
+# implementation (not part of the openmediatransport org) - see
+# https://github.com/MikanseiLaboratory/openmediatransport-rs
+[dependencies]
+openmediatransport = { git = "https://github.com/MikanseiLaboratory/openmediatransport-rs", rev = "2e57ca89e0af4ca9f4e9642c72f26c0d0b1eef64" }
+# Structured logging - tracing-journald writes events straight to journald's
+# native protocol (with the binary-safe framing and memfd fallback we'd
+# otherwise have to hand-roll ourselves).
+tracing = "0.1"
+tracing-journald = "0.3"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["registry"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = 3
