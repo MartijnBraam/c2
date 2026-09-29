@@ -50,9 +50,9 @@ if [ "$1" == "image" ]; then
 fi
 
 msg "Installing dependencies available in Debian Trixie"
-debian python3-opencv python3-evdev python3-picamera2 python3-pil python3-humanfriendly python3-alsaaudio fonts-liberation fonts-font-awesome haproxy golang wget
+debian python3-opencv python3-evdev python3-picamera2 python3-pil python3-humanfriendly python3-alsaaudio fonts-liberation fonts-font-awesome nginx golang python3-pip wget
 
-msg "Build the API server and drivers..."
+msg "Building the audio overlay and kernel driver..."
 make all
 make install-overlays install-driver
 
@@ -67,19 +67,30 @@ else
   echo "Already installed, skipping..."
 fi
 
+msg "Installing misirka (mskpipe binary + Python library)..."
+if [ ! -x /usr/local/bin/mkspipe ]; then
+  rm -rf misirka
+  git clone --depth=1 https://github.com/dexterlb/misirka
+  (cd misirka/go && go build -o /usr/local/bin/mkspipe ./cmd/mskpipe)
+  # py/pyproject.toml points readme outside its own directory, which hatchling
+  # refuses to package ("Readme path must be within the project directory") - drop it
+  sed -i '/^readme = /d' misirka/py/pyproject.toml
+  pip install --break-system-packages ./misirka/py
+  rm -rf misirka
+else
+  echo "Already installed, skipping..."
+fi
+
 msg "Putting config files in place..."
 install -m644 system/camera.service /etc/systemd/system/camera.service
 sed -i '/^WorkingDirectory=/c\WorkingDirectory='$PWD /etc/systemd/system/camera.service
-install -m644 system/camera-api.service /etc/systemd/system/camera-api.service
-sed -i '/^ExecStart=/c\ExecStart='$PWD/c2_api /etc/systemd/system/camera-api.service
-install -m644 system/haproxy.cfg /etc/haproxy/haproxy.cfg
+install -m644 system/nginx.conf /etc/nginx/sites-available/default
 mkdir -p /etc/mediamtx
 install -m644 system/mediamtx.yml /etc/mediamtx/mediamtx.yml
 install -m644 system/mediamtx.service /etc/systemd/system/mediamtx.service
 
 msg "Enabling the camera services..."
 systemctl enable $SYSTEMDOPT camera
-systemctl enable $SYSTEMDOPT camera-api
 
 ip=$(ip -o route get to 1.2.3.4 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
 echo "Installation complete"

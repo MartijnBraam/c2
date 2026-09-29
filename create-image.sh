@@ -131,7 +131,7 @@ sudo rm -rf "$WORK"/var/cache/apt/archives/
 sudo rm -rf "$WORK"/usr/share/doc/
 
 msg "Cloning repository"
-sudo chroot "$WORK"/rootfs git clone https://github.com/MartijnBraam/picam /opt/mncam
+sudo chroot "$WORK"/rootfs git clone https://github.com/MartijnBraam/c2 /opt/mncam
 
 msg "Running installer script"
 sudo cp install.sh "$WORK"/rootfs/opt/mncam/install.sh
